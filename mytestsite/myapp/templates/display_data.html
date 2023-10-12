@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Display Data</title>
+  </head>
+  <body>
+    <h1>User Searches</h1>
+    <ul>
+      {% for user_search in user_searches %}
+      <li><strong>{{ user_search.id }}:{{ user_search.search_terms }}</strong></li>
+      {% endfor %}
+    </ul>
+
+    <ul>
+      {% for user_search in user_searches %}
+      <li>
+        <h1>Project</h1>
+        <strong>{{ user_search.id }}:{{ user_search.search_terms }}<br>Total_Sentiment = {{user_search.total_sentiments }}<br>Each_Keyword_Total_Sentiment = {{user_search.each_keyword_total_sentiments }}</strong>
+      </li>
+      <h2>News Articles: {{user_search.total_news_responses}}</h2>
+      <ul>
+        {% for article in news_articles_k1 %}
+          {% if article.user_search_id == user_search.id %}
+            <li><strong>Keyword: {{ article.keyword }}:{{ article.sentiments }}</strong></li>
+            <ul>
+              {% for data in article.data|slice:":2" %}
+              <li>Sentiment: {{ data.sentiment }}</li>
+              <li>Author: {{ data.author }}</li>
+              <p>Content: {{ data.content }}</p>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endfor %}
+        
+        {% for article in news_articles_k2 %}
+          {% if article.user_search_id == user_search.id %}
+            <li><strong>Keyword: {{ article.keyword }}:{{ article.sentiments }}</strong></li>
+            <ul>
+              {% for data in article.data|slice:":2" %}
+              <li>Sentiment: {{ data.sentiment }}</li>
+              <li>Author: {{ data.author }}</li>
+              <p>Content: {{ data.content }}</p>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endfor %}
+
+        {% for article in news_articles_k3 %}
+          {% if article.user_search_id == user_search.id %}
+            <li><strong>Keyword: {{ article.keyword }}:{{ article.sentiments }}</strong></li>
+            <ul>
+              {% for data in article.data|slice:":2" %}
+              <li>Sentiment: {{ data.sentiment }}</li>
+              <li>Author: {{ data.author }}</li>
+              <p>Content: {{ data.content }}</p>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endfor %}      
+      </ul>
+      
+      <h2>Reddit Comments: {{user_search.total_reddit_responses}}</h2>
+      <ul>
+        {% for article in reddit_articles_k1 %}
+          {% if article.user_search_id == user_search.id %}
+            <li><strong>Keyword: {{ article.keyword }}:{{ article.sentiments }}</strong></li>
+            <ul>
+              {% for data in article.data|slice:":2" %}
+              <li>Sentiment: {{ data.sentiment }}</li>
+              <li>Author: {{ data.author }}</li>
+              <p>Content: {{ data.content }}</p>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endfor %}
+
+        {% for article in reddit_articles_k2 %}
+          {% if article.user_search_id == user_search.id %}
+            <li><strong>Keyword: {{ article.keyword }}:{{ article.sentiments }}</strong></li>
+            <ul>
+              {% for data in article.data|slice:":2" %}
+              <li>Sentiment: {{ data.sentiment }}</li>
+              <li>Author: {{ data.author }}</li>
+              <p>Content: {{ data.content }}</p>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endfor %}  
+
+        {% for article in reddit_articles_k3 %}
+          {% if article.user_search_id == user_search.id %}
+            <li><strong>Keyword: {{ article.keyword }}:{{ article.sentiments }}</strong></li>
+            <ul>
+              {% for data in article.data|slice:":2" %}
+              <li>Sentiment: {{ data.sentiment }}</li>
+              <li>Author: {{ data.author }}</li>
+              <p>Content: {{ data.content }}</p>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endfor %}
+
+      </ul>
+      {% endfor %}
+    </ul>
+  </body>
+</html>
