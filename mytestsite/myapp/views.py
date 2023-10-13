@@ -1,7 +1,7 @@
 from django.shortcuts import render
 import requests
 from django.http import HttpResponse
-from .models import RedditArticle_K1, RedditArticle_K2, RedditArticle_K3, NewsArticle_K1, NewsArticle_K2, NewsArticle_K3, UserSearch, News_Articles, Reddit_Comments
+from .models import Reddit_Comments_K1, Reddit_Comments_K2, Reddit_Comments_K3, News_Articles_K1, News_Articles_K2, News_Articles_K3, UserSearch, News_Articles, Reddit_Comments
 import praw
 import json
 from django.views.decorators.csrf import csrf_exempt
@@ -58,13 +58,13 @@ def fetch_data(request):
                     articles = data.get('articles', [])
 
                     # Determine the appropriate NewsArticle model based on the index
-                    news_article_model = None
+                    news_articles_model = None
                     if index == 0:
-                        news_article_model = NewsArticle_K1
+                        news_articles_model = News_Articles_K1
                     elif index == 1:
-                        news_article_model = NewsArticle_K2
+                        news_articles_model = News_Articles_K2
                     elif index == 2:
-                        news_article_model = NewsArticle_K3
+                        news_articles_model = News_Articles_K3
                     all_news_data = []
                     # Initialize counters for sentiments
                     sentiments = {
@@ -122,7 +122,7 @@ def fetch_data(request):
                     news_articles.save()
                     
                     # data_column = json.dumps(all_data)
-                    news_article_model.objects.create(
+                    news_articles_model.objects.create(
                         data=all_news_data,
                         keyword=search_keyword,
                         sentiments=sentiments,
@@ -138,7 +138,7 @@ def fetch_data(request):
                         "neutral_count": 0,
                     }
 
-                for article_model in [NewsArticle_K1, NewsArticle_K2, NewsArticle_K3]:
+                for article_model in [News_Articles_K1, News_Articles_K1, News_Articles_K3]:
                     articles = article_model.objects.filter(user_search=user_search)
                     for article in articles:
                         keyword = article.keyword
@@ -240,17 +240,17 @@ def fetch_data(request):
 
                 # Create an instance of the appropriate model based on the keyword
                 if index == 0:
-                    reddit_article = RedditArticle_K1(sentiments=sentiments, data=formatted_comments,
+                    reddit_article = Reddit_Comments_K1(sentiments=sentiments, data=formatted_comments,
                                                     keyword=search_keyword, user_search=user_search)
                 elif index == 1:
-                    reddit_article = RedditArticle_K2(sentiments=sentiments, data=formatted_comments,
+                    reddit_article = Reddit_Comments_K2(sentiments=sentiments, data=formatted_comments,
                                                     keyword=search_keyword, user_search=user_search)
                 elif index == 2:
-                    reddit_article = RedditArticle_K3(sentiments=sentiments, data=formatted_comments,
+                    reddit_article = Reddit_Comments_K3(sentiments=sentiments, data=formatted_comments,
                                                     keyword=search_keyword, user_search=user_search)
                 print(f"Reddit Comments fetched successfully for {search_keyword}!")
                 # Calculate and update keyword_total_sentiments here
-                for article_model in [RedditArticle_K1, RedditArticle_K2, RedditArticle_K3]:
+                for article_model in [Reddit_Comments_K1, Reddit_Comments_K2, Reddit_Comments_K3]:
                     articles = article_model.objects.filter(user_search=user_search)
                     for article in articles:
                         keyword = article.keyword
@@ -279,22 +279,26 @@ def fetch_data(request):
 def display_data(request):
     # Retrieve the data from the models
     user_searches = UserSearch.objects.all()
-    news_articles_k1 = NewsArticle_K1.objects.all()
-    news_articles_k2 = NewsArticle_K2.objects.all()
-    news_articles_k3 = NewsArticle_K3.objects.all()
-    reddit_articles_k1 = RedditArticle_K1.objects.all()
-    reddit_articles_k2 = RedditArticle_K2.objects.all()
-    reddit_articles_k3 = RedditArticle_K3.objects.all()
+    news_articles = News_Articles.objects.all()
+    reddit_comments = Reddit_Comments.objects.all()
+    news_articles_k1 = News_Articles_K1.objects.all()
+    news_articles_k2 = News_Articles_K1.objects.all()
+    news_articles_k3 = News_Articles_K3.objects.all()
+    reddit_comments_k1 = Reddit_Comments_K1.objects.all()
+    reddit_comments_k2 = Reddit_Comments_K2.objects.all()
+    reddit_comments_k3 = Reddit_Comments_K3.objects.all()
 
     # You can pass this data to your template as context
     context = {
         'user_searches': user_searches,
+        'news_articles': news_articles,
+        'reddit_comments': reddit_comments,
         'news_articles_k1': news_articles_k1,
         'news_articles_k2': news_articles_k2,
         'news_articles_k3': news_articles_k3,
-        'reddit_articles_k1': reddit_articles_k1,
-        'reddit_articles_k2': reddit_articles_k2,
-        'reddit_articles_k3': reddit_articles_k3,
+        'reddit_comments_k1': reddit_comments_k1,
+        'reddit_comments_k2': reddit_comments_k2,
+        'reddit_comments_k3': reddit_comments_k3,
     }
 
     return render(request, 'display_data.html', context)

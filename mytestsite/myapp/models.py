@@ -11,39 +11,6 @@ class UserSearch(models.Model):
     each_keyword_sentiments_from_news = models.JSONField(default=None,null=True)
     each_keyword_sentiments_from_reddit = models.JSONField(default=None,null=True)
 
-class NewsArticle_K1(models.Model):
-    user_search = models.ForeignKey(UserSearch, on_delete=models.CASCADE)
-    keyword = models.TextField(null=True)
-    data = models.JSONField(default=list)
-    sentiments = models.JSONField(default=None,null=True)
-class NewsArticle_K2(models.Model):
-    user_search = models.ForeignKey(UserSearch, on_delete=models.CASCADE)
-    keyword = models.TextField(null=True)
-    data = models.JSONField(default=list)
-    sentiments = models.JSONField(default=None,null=True)
-class NewsArticle_K3(models.Model):
-    user_search = models.ForeignKey(UserSearch, on_delete=models.CASCADE)
-    keyword = models.TextField(null=True)
-    data = models.JSONField(default=list)
-    sentiments = models.JSONField(default=None,null=True)
-    
-class RedditArticle_K1(models.Model):
-    user_search = models.ForeignKey(UserSearch, on_delete=models.CASCADE)
-    keyword = models.TextField(null=True)
-    data = models.JSONField(default=list)
-    sentiments = models.JSONField(default=None,null=True)
-class RedditArticle_K2(models.Model):
-    user_search = models.ForeignKey(UserSearch, on_delete=models.CASCADE)
-    keyword = models.TextField(null=True)
-    data = models.JSONField(default=list)
-    sentiments = models.JSONField(default=None,null=True)
-class RedditArticle_K3(models.Model):
-    user_search = models.ForeignKey(UserSearch, on_delete=models.CASCADE)
-    keyword = models.TextField(null=True)    
-    data = models.JSONField(default=list)
-    sentiments = models.JSONField(default=None,null=True)
-    
-    
 class News_Articles(models.Model):
     user_search = models.ForeignKey(UserSearch, on_delete=models.CASCADE)
     search_terms = models.TextField(null=True)
@@ -53,9 +20,23 @@ class News_Articles(models.Model):
     K2_news_sentiments = models.JSONField(default=None,null=True)
     K3_news_data = models.JSONField(default=None,null=True)
     K3_news_sentiments = models.JSONField(default=None,null=True)
+class News_Articles_K1(models.Model):
+    user_search = models.ForeignKey(UserSearch, on_delete=models.CASCADE)
+    keyword = models.TextField(null=True)
+    data = models.JSONField(default=list)
+    sentiments = models.JSONField(default=None,null=True)
+class News_Articles_K2(models.Model):
+    user_search = models.ForeignKey(UserSearch, on_delete=models.CASCADE)
+    keyword = models.TextField(null=True)
+    data = models.JSONField(default=list)
+    sentiments = models.JSONField(default=None,null=True)
+class News_Articles_K3(models.Model):
+    user_search = models.ForeignKey(UserSearch, on_delete=models.CASCADE)
+    keyword = models.TextField(null=True)
+    data = models.JSONField(default=list)
+    sentiments = models.JSONField(default=None,null=True)
     
-
-
+    
 class Reddit_Comments(models.Model):
     user_search = models.ForeignKey(UserSearch, on_delete=models.CASCADE)
     search_terms = models.TextField(null=True)
@@ -65,6 +46,24 @@ class Reddit_Comments(models.Model):
     K2_reddit_sentiments = models.JSONField(default=None,null=True)
     K3_reddit_data = models.JSONField(default=None,null=True)
     K3_reddit_sentiments = models.JSONField(default=None,null=True)
+class Reddit_Comments_K1(models.Model):
+    user_search = models.ForeignKey(UserSearch, on_delete=models.CASCADE)
+    keyword = models.TextField(null=True)
+    data = models.JSONField(default=list)
+    sentiments = models.JSONField(default=None,null=True)
+class Reddit_Comments_K2(models.Model):
+    user_search = models.ForeignKey(UserSearch, on_delete=models.CASCADE)
+    keyword = models.TextField(null=True)
+    data = models.JSONField(default=list)
+    sentiments = models.JSONField(default=None,null=True)
+class Reddit_Comments_K3(models.Model):
+    user_search = models.ForeignKey(UserSearch, on_delete=models.CASCADE)
+    keyword = models.TextField(null=True)    
+    data = models.JSONField(default=list)
+    sentiments = models.JSONField(default=None,null=True)
+    
+
+
 
 
 
