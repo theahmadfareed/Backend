@@ -1,13 +1,14 @@
 from django.shortcuts import render
 import requests
-from django.http import HttpResponse, JsonResponse
-from .models import Reddit_Comments_K1, Reddit_Comments_K2, Reddit_Comments_K3, News_Articles_K1, News_Articles_K2, News_Articles_K3, UserSearch, News_Articles, Reddit_Comments
+from django.http import HttpResponse
+from .models import *
 import praw
 import json
 from django.views.decorators.csrf import csrf_exempt
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import prawcore
-
+from .serializers import *
+from rest_framework import generics
 
 def home(request):
     return HttpResponse("Hello World!")
@@ -565,3 +566,76 @@ def display_data(request):
     }
 
     return render(request, 'display_data.html', context)
+
+
+class UserSearchList(generics.ListCreateAPIView):
+    queryset = UserSearch.objects.all()
+    serializer_class = UserSearchSerializer
+
+class UserSearchDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = UserSearch.objects.all()
+    serializer_class = UserSearchSerializer
+
+class NewsArticlesList(generics.ListCreateAPIView):
+    queryset = News_Articles.objects.all()
+    serializer_class = NewsArticlesSerializer
+
+class NewsArticlesDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = News_Articles.objects.all()
+    serializer_class = NewsArticlesSerializer
+
+class NewsArticlesK1List(generics.ListCreateAPIView):
+    queryset = News_Articles_K1.objects.all()
+    serializer_class = NewsArticlesK1Serializer
+
+class NewsArticlesK1Detail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = News_Articles_K1.objects.all()
+    serializer_class = NewsArticlesK1Serializer
+
+class NewsArticlesK2List(generics.ListCreateAPIView):
+    queryset = News_Articles_K2.objects.all()
+    serializer_class = NewsArticlesK2Serializer
+
+class NewsArticlesK2Detail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = News_Articles_K2.objects.all()
+    serializer_class = NewsArticlesK2Serializer
+
+class NewsArticlesK3List(generics.ListCreateAPIView):
+    queryset = News_Articles_K3.objects.all()
+    serializer_class = NewsArticlesK3Serializer
+
+class NewsArticlesK3Detail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = News_Articles_K3.objects.all()
+    serializer_class = NewsArticlesK3Serializer
+
+class RedditCommentsList(generics.ListCreateAPIView):
+    queryset = Reddit_Comments.objects.all()
+    serializer_class = RedditCommentsSerializer
+
+class RedditCommentsDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Reddit_Comments.objects.all()
+    serializer_class = RedditCommentsSerializer
+
+class RedditCommentsK1List(generics.ListCreateAPIView):
+    queryset = Reddit_Comments_K1.objects.all()
+    serializer_class = RedditCommentsK1Serializer
+
+class RedditCommentsK1Detail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Reddit_Comments_K1.objects.all()
+    serializer_class = RedditCommentsK1Serializer
+
+class RedditCommentsK2List(generics.ListCreateAPIView):
+    queryset = Reddit_Comments_K2.objects.all()
+    serializer_class = RedditCommentsK2Serializer
+
+class RedditCommentsK2Detail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Reddit_Comments_K2.objects.all()
+    serializer_class = RedditCommentsK2Serializer
+
+class RedditCommentsK3List(generics.ListCreateAPIView):
+    queryset = Reddit_Comments_K3.objects.all()
+    serializer_class = RedditCommentsK3Serializer
+
+class RedditCommentsK3Detail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Reddit_Comments_K3.objects.all()
+    serializer_class = RedditCommentsK3Serializer
