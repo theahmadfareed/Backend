@@ -1,6 +1,7 @@
+from datetime import datetime
 from django.shortcuts import render
 import requests
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from .models import *
 import praw
 import json
@@ -9,273 +10,9 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import prawcore
 from .serializers import *
 from rest_framework import generics
+import pytz
+from collections import defaultdict
 
-def home(request):
-    return HttpResponse("Hello World!")
-
-# @csrf_exempt
-# def fetch_data(request):
-#     if request.method == 'POST':
-#         try:
-#             # # Initialize dictionaries to track total response counts
-#             total_news_responses = {}
-#             total_reddit_responses = {}
-#             analyzer = SentimentIntensityAnalyzer() 
-
-#             # Parse the JSON data from the request body
-#             data = json.loads(request.body.decode('utf-8'))  # Decode the bytes to a string
-#             search_keywords = data.get('keywords', [])
-#             user_search = UserSearch(search_terms=search_keywords)
-#             user_search.save()
-
-#             total_sentiments = {
-#                 "positive_count": 0,
-#                 "negative_count": 0,
-#                 "neutral_count": 0,
-#             }
-
-#             k1_news_data = []
-#             k2_news_data = []
-#             k3_news_data = []
-#             k1_sentiments = {}
-#             k2_sentiments = {}
-#             k3_sentiments = {}
-#             L=[]
-            
-#             # Define the search keywords
-#             api_key = '1a8e8d019bb0420e8aa011b382aa8f76'
-#             # Iterate over each search keyword and fetch news articles
-#             for index, search_keyword in enumerate(search_keywords):
-#                 print("Keyword = " + search_keyword)
-#                 url = f'https://newsapi.org/v2/everything?q={search_keyword}&apiKey={api_key}&sort_by=relevancy&language=en&pageSize=100'
-#                 response = requests.get(url)
-
-#                 if response.status_code == 200:
-#                     # Increment the total news response count
-#                     total_news_responses[search_keyword] = len(response.json().get('articles', []))
-
-#                     print(f"News fetched successfully for {search_keyword}!")
-#                     data = response.json()
-#                     articles = data.get('articles', [])
-
-#                     # Determine the appropriate NewsArticle model based on the index
-#                     news_articles_model = None
-#                     if index == 0:
-#                         news_articles_model = News_Articles_K1
-#                     elif index == 1:
-#                         news_articles_model = News_Articles_K2
-#                     elif index == 2:
-#                         news_articles_model = News_Articles_K3
-#                     all_news_data = []
-#                     # Initialize counters for sentiments
-#                     sentiments = {
-#                         "keyword": search_keyword,
-#                         "positive_count": 0,
-#                         "negative_count": 0,
-#                         "neutral_count": 0,
-#                     }
-#                     # Save the news articles to the corresponding model
-#                     for article in articles:
-#                         author = article.get('author') if article.get('author') else "Unknown"
-#                         content = article.get('content')
-#                         # Perform sentiment analysis on the article content using VADER
-#                         sentiment_scores = analyzer.polarity_scores(content)
-#                         compound_score = sentiment_scores['compound']
-#                         # Decide sentiment label based on the compound score
-#                         if compound_score >= 0.05:
-#                             sentiment_label = "Positive"
-#                             sentiments['positive_count'] += 1
-#                             total_sentiments['positive_count'] += 1
-#                         elif compound_score <= -0.05:
-#                             sentiment_label = "Negative"
-#                             sentiments['negative_count'] += 1
-#                             total_sentiments['negative_count'] += 1
-#                         else:
-#                             sentiment_label = "Neutral"
-#                             sentiments['neutral_count'] += 1
-#                             total_sentiments['neutral_count'] += 1
-
-#                         data = {"author": author, "content": content, "sentiment": sentiment_label}
-#                         all_news_data.append(data)
-                        
-#                         if index == 0:
-#                             k1_news_data = all_news_data
-#                             k1_sentiments = sentiments
-#                         elif index == 1:
-#                             k2_news_data = all_news_data
-#                             k2_sentiments = sentiments
-#                         elif index == 2:
-#                             k3_news_data = all_news_data
-#                             k3_sentiments = sentiments
-                    
-#                     L.append(sentiments)
-#                     user_search.each_keyword_sentiments_from_news = L
-#                     user_search.save()
-                    
-#                     news_articles, _ = News_Articles.objects.get_or_create(user_search=user_search)
-#                     news_articles.search_terms = search_keywords
-#                     news_articles.K1_news_data = k1_news_data
-#                     news_articles.K2_news_data = k2_news_data
-#                     news_articles.K3_news_data = k3_news_data
-#                     news_articles.K1_news_sentiments = k1_sentiments
-#                     news_articles.K2_news_sentiments = k2_sentiments
-#                     news_articles.K3_news_sentiments = k3_sentiments
-#                     news_articles.save()
-                    
-#                     # data_column = json.dumps(all_data)
-#                     news_articles_model.objects.create(
-#                         data=all_news_data,
-#                         keyword=search_keyword,
-#                         sentiments=sentiments,
-#                         user_search=user_search
-#                     )
-#                     print(f"News saved successfully for {search_keyword}!")
-#                 # Calculate and update keyword_total_sentiments here
-#                 keyword_total_sentiments = {}
-#                 for keyword in search_keywords:
-#                     keyword_total_sentiments[keyword] = {
-#                         "positive_count": 0,
-#                         "negative_count": 0,
-#                         "neutral_count": 0,
-#                     }
-
-#                 for article_model in [News_Articles_K1, News_Articles_K1, News_Articles_K3]:
-#                     articles = article_model.objects.filter(user_search=user_search)
-#                     for article in articles:
-#                         keyword = article.keyword
-#                         keyword_total_sentiments[keyword]['positive_count'] += article.sentiments['positive_count']
-#                         keyword_total_sentiments[keyword]['negative_count'] += article.sentiments['negative_count']
-#                         keyword_total_sentiments[keyword]['neutral_count'] += article.sentiments['neutral_count']
-
-
-#             # Reddit API credentials
-#             client_id = 'VF395KMJmO6y_8kFIEaaxQ'
-#             client_secret = 'qYyujCOjm4u7FGmd4gp9pZvYN8eFUw'
-#             user_agent = "Django-FYP 1.0 by /u/ahmadfareed"
-
-#             # Initialize the Reddit API client
-#             reddit = praw.Reddit(
-#                 client_id=client_id,
-#                 client_secret=client_secret,
-#                 user_agent=user_agent
-#             )
-#             k1_reddit_data = []
-#             k2_reddit_data = []
-#             k3_reddit_data = []
-#             k1_sentiments = {}
-#             k2_sentiments = {}
-#             k3_sentiments = {}
-#             L=[]
-#             # Iterate over each search keyword and fetch related subreddits
-#             for index, search_keyword in enumerate(search_keywords):
-#                 print("Keyword = " + search_keyword)
-#                 formatted_comments = []
-#                 # Initialize counters for sentiments
-#                 sentiments = {
-#                     "keyword": search_keyword,
-#                     "positive_count": 0,
-#                     "negative_count": 0,
-#                     "neutral_count": 0,
-#                 }
-#                 try:
-#                     for comment in reddit.subreddit(search_keyword).comments(limit=100):
-#                         print(f"Reddit Comments fetched successfully for {search_keyword}!")
-#                         # Extract relevant data from the Redditor object
-#                         author_name = comment.author.name if comment.author else "Unknown"
-#                         comment_body = comment.body
-#                         # Perform sentiment analysis on the comment body using VADER
-#                         sentiment_scores = analyzer.polarity_scores(comment_body)
-#                         compound_score = sentiment_scores['compound']
-#                         # Decide sentiment label based on the compound score
-#                         if compound_score >= 0.05:
-#                             sentiment_label = "Positive"
-#                             sentiments['positive_count'] += 1
-#                             total_sentiments['positive_count'] += 1
-#                         elif compound_score <= -0.05:
-#                             sentiment_label = "Negative"
-#                             sentiments['negative_count'] += 1
-#                             total_sentiments['negative_count'] += 1
-#                         else:
-#                             sentiment_label = "Neutral"
-#                             sentiments['neutral_count'] += 1
-#                             total_sentiments['neutral_count'] += 1
-
-#                         data = {
-#                             "author": author_name,
-#                             "content": comment_body,
-#                             "sentiment": sentiment_label,
-#                         }
-#                         formatted_comments.append(data)
-                        
-#                         if index == 0:
-#                             k1_reddit_data = formatted_comments
-#                             k1_sentiments = sentiments
-#                         elif index == 1:
-#                             k2_reddit_data = formatted_comments
-#                             k2_sentiments = sentiments
-#                         elif index == 2:
-#                             k3_reddit_data = formatted_comments
-#                             k3_sentiments = sentiments
-                            
-#                     L.append(sentiments)
-#                     user_search.each_keyword_sentiments_from_reddit = L
-#                     user_search.save()
-                    
-#                     reddit_comments, _ = Reddit_Comments.objects.get_or_create(user_search=user_search)
-#                     reddit_comments.search_terms = search_keywords
-#                     reddit_comments.K1_reddit_data = k1_reddit_data
-#                     reddit_comments.K2_reddit_data = k2_reddit_data
-#                     reddit_comments.K3_reddit_data = k3_reddit_data
-#                     reddit_comments.K1_reddit_sentiments = k1_sentiments
-#                     reddit_comments.K2_reddit_sentiments = k2_sentiments
-#                     reddit_comments.K3_reddit_sentiments = k3_sentiments
-#                     reddit_comments.save()
-                
-
-#                 except prawcore.exceptions.NotFound:
-#                     print(f"Subreddit '{search_keyword}' not found or is private.")
-#                     # You can handle this exception as needed, e.g., skip this subreddit
-#                     continue
-                
-#                 # Increment the total Reddit response count
-#                 total_reddit_responses[search_keyword] = len(formatted_comments)
-
-#                 # Create an instance of the appropriate model based on the keyword
-#                 if index == 0:
-#                     reddit_article = Reddit_Comments_K1(sentiments=sentiments, data=formatted_comments,
-#                                                     keyword=search_keyword, user_search=user_search)
-#                 elif index == 1:
-#                     reddit_article = Reddit_Comments_K2(sentiments=sentiments, data=formatted_comments,
-#                                                     keyword=search_keyword, user_search=user_search)
-#                 elif index == 2:
-#                     reddit_article = Reddit_Comments_K3(sentiments=sentiments, data=formatted_comments,
-#                                                     keyword=search_keyword, user_search=user_search)
-#                 print(f"Reddit Comments saved successfully for {search_keyword}!")
-#                 # Calculate and update keyword_total_sentiments here
-#                 for article_model in [Reddit_Comments_K1, Reddit_Comments_K2, Reddit_Comments_K3]:
-#                     articles = article_model.objects.filter(user_search=user_search)
-#                     for article in articles:
-#                         keyword = article.keyword
-#                         keyword_total_sentiments[keyword]['positive_count'] += article.sentiments['positive_count']
-#                         keyword_total_sentiments[keyword]['negative_count'] += article.sentiments['negative_count']
-#                         keyword_total_sentiments[keyword]['neutral_count'] += article.sentiments['neutral_count']
-#                 user_search.total_sentiments = total_sentiments
-#                 user_search.each_keyword_total_sentiments = keyword_total_sentiments
-#                 user_search.total_news_responses = total_news_responses
-#                 user_search.total_reddit_responses = total_reddit_responses
-#                 user_search.save()
-#                 # Save the comment to the corresponding model
-#                 reddit_article.save()
-#             # Return an HTTP response
-#             return HttpResponse("Data fetched and saved!")
-#         except json.JSONDecodeError:
-#             return HttpResponse("Invalid JSON data.", status=400)
-#         except Exception as e:
-#             # Handle other exceptions here, log them, and return an appropriate response
-#             return HttpResponse(f"An error occurred: {str(e)}", status=500)
-#     else:
-#         return HttpResponse("Invalid request method.", status=405)
-    
 @csrf_exempt
 def fetch_save_data (request):
     if request.method == 'POST':
@@ -285,62 +22,92 @@ def fetch_save_data (request):
             search_keywords = data.get('keywords', [])
             user_search = UserSearch(search_terms=search_keywords)
             user_search.save()
+                        
+            each_keyword_sentiments_from_news, each_keyword_news_combine_data = fetch_save_news_data(search_keywords, user_search)
+            each_keyword_sentiments_from_reddit, each_keyword_reddit_combine_data = fetch_save_reddit_data(search_keywords, user_search)
             
+            combined_data = []
+            combined_data.extend(each_keyword_news_combine_data)
+            combined_data.extend(each_keyword_reddit_combine_data)
+            sorted_data = sorted(combined_data, key=lambda x: x['data']['published_at'], reverse=True)
             
-            L1 = fetch_save_news_data(search_keywords, user_search)
-            L2 = fetch_save_reddit_data(search_keywords, user_search)
-            # print("L1 = ",L1)
-            # print("L2 = ",L2)
-            # Create a dictionary to store the combined sentiment counts
-            combined_sentiments = {}
+            user_search.each_keyword_combine_data = sorted_data
+            user_search.save()
 
-            # Iterate through L1 and update the combined_sentiments dictionary
-            for item in L1:
-                keyword = item['keyword']
-                if keyword not in combined_sentiments:
-                    combined_sentiments[keyword] = item
-                else:
-                    combined_sentiments[keyword]['positive_count'] += item['positive_count']
-                    combined_sentiments[keyword]['negative_count'] += item['negative_count']
-                    combined_sentiments[keyword]['neutral_count'] += item['neutral_count']
+            # Initialize dictionaries to store sentiment counts
+            sentiment_counts = defaultdict(lambda: defaultdict(int))
 
-            # Iterate through L2 and update the combined_sentiments dictionary
-            for item in L2:
-                keyword = item['keyword']
-                if keyword not in combined_sentiments:
-                    combined_sentiments[keyword] = item
-                else:
-                    combined_sentiments[keyword]['positive_count'] += item['positive_count']
-                    combined_sentiments[keyword]['negative_count'] += item['negative_count']
-                    combined_sentiments[keyword]['neutral_count'] += item['neutral_count']
-            # Initialize a dictionary to store the total sentiments
-            total_sentiments = {'positive': 0, 'negative': 0, 'neutral': 0}
+            # Iterate through the sorted_data and count sentiments for each date
+            for data in sorted_data:
+                date = data["data"]["published_at"][:10]  # Extract the date
+                sentiment = data["data"]["sentiment_label"]
+                sentiment_counts[date][sentiment] += 1
 
-            # Iterate through the combined dictionary and sum sentiment counts
-            for counts in combined_sentiments.values():
-                total_sentiments['positive'] += counts['positive_count']
-                total_sentiments['negative'] += counts['negative_count']
-                total_sentiments['neutral'] += counts['neutral_count']
+            # Create the final lists
+            dates = sorted(sentiment_counts.keys())
+            positive = [sentiment_counts[date]["Positive"] for date in dates]
+            negative = [sentiment_counts[date]["Negative"] for date in dates]
+            neutral = [sentiment_counts[date]["Neutral"] for date in dates]
 
-            # Convert the dictionary back to a list
-            combined_sentiments_list = list(combined_sentiments.values())
-            # print("L3 = ", combined_sentiments_list)
-            user_search.each_keyword_total_sentiments = combined_sentiments_list
-            user_search.total_sentiments = total_sentiments
+            result_data = {
+                "Dates":dates,
+                "Positive":positive,
+                "Negative":negative,
+                "Neutral":neutral,
+            }
+            user_search.graph_data = result_data
+            user_search.save()
+
+            # Initialize an empty L3
+            each_key_sentiment = []
+
+            # Iterate through keywords in L1 and L2
+            for keyword_data1, keyword_data2 in zip(each_keyword_sentiments_from_news, each_keyword_sentiments_from_reddit):
+                # Ensure the keywords match
+                assert keyword_data1["keyword"] == keyword_data2["keyword"]
+                keyword = keyword_data1["keyword"]
+
+                # Calculate the total sentiments for the keyword
+                L3 = {
+                    "keyword": keyword,
+                    "neutral_count": keyword_data1["neutral_count"] + keyword_data2["neutral_count"],
+                    "negative_count": keyword_data1["negative_count"] + keyword_data2["negative_count"],
+                    "positive_count": keyword_data1["positive_count"] + keyword_data2["positive_count"],
+                }
+
+                each_key_sentiment.append(L3)
+                
+            user_search.each_keyword_total_sentiments = each_key_sentiment
+            user_search.save()
+
+            ls=[]
+            total_sentiments = {
+                "total_positive": 0,
+                "total_negative": 0,
+                "total_neutral": 0
+            }
+
+            for keyword_data in each_key_sentiment:
+                total_sentiments["total_positive"] += keyword_data["positive_count"]
+                total_sentiments["total_negative"] += keyword_data["negative_count"]
+                total_sentiments["total_neutral"] += keyword_data["neutral_count"]
+            ls.append(total_sentiments)    
+            user_search.total_sentiments = ls
             user_search.save()
             
+            return JsonResponse({"project_id": user_search.id, "message": "Data fetched and saved successfully."}, status=200)
+
         except Exception as e:
             # Handle other exceptions here, log them, and return an appropriate response
             return HttpResponse(f"An error occurred: {str(e)}", status=500)
     else:
         return HttpResponse("Invalid request method.", status=405)
     
-    return HttpResponse("Data fetched and saved successfully.")
-
 @csrf_exempt
 def fetch_save_news_data(search_keywords, user_search):
     
-    total_news_responses = {}
+    each_keyword_total_news_responses = {}
+    each_keyword_sentiments_from_news=[]
     
     k1_news_data = []
     k2_news_data = []
@@ -350,21 +117,22 @@ def fetch_save_news_data(search_keywords, user_search):
     k2_sentiments = {}
     k3_sentiments = {}
     
-    L1=[]
     
     api_key = '1a8e8d019bb0420e8aa011b382aa8f76'
     analyzer = SentimentIntensityAnalyzer()
     
     for index, search_keyword in enumerate(search_keywords):
         
-        url = f'https://newsapi.org/v2/everything?q={search_keyword}&apiKey={api_key}&sort_by=relevancy&language=en&pageSize=100'
+        url = f'https://newsapi.org/v2/everything?q={search_keyword}&apiKey={api_key}&sort_by=relevancy&language=en&pageSize=10'
         response = requests.get(url)
 
         if response.status_code == 200:
             print(f"News fetched successfully for {search_keyword}!")
             
-            total_news_responses[search_keyword] = len(response.json().get('articles', []))
-            user_search.total_news_responses = total_news_responses
+            each_keyword_total_news_responses[search_keyword] = len(response.json().get('articles', []))
+            user_search.each_keyword_total_news_responses = each_keyword_total_news_responses
+            user_search.save()
+            
             data = response.json()
             articles = data.get('articles', [])
             
@@ -380,22 +148,35 @@ def fetch_save_news_data(search_keywords, user_search):
             sentiments = {"keyword": search_keyword, "positive_count": 0, "negative_count": 0, "neutral_count": 0}
 
             for article in articles:
+                
                 author = article.get('author') if article.get('author') else "Unknown"
-                content = article.get('content')
-                sentiment_scores = analyzer.polarity_scores(content)
-                compound_score = sentiment_scores['compound']
+                content = article.get('description') if article.get('description') else "Unknown"
 
-                if compound_score >= 0.05:
-                    sentiment_label = "Positive"
-                    sentiments['positive_count'] += 1
-                elif compound_score <= -0.05:
-                    sentiment_label = "Negative"
-                    sentiments['negative_count'] += 1
-                else:
-                    sentiment_label = "Neutral"
-                    sentiments['neutral_count'] += 1
+                published_at_str = article.get('publishedAt')
+                if published_at_str.endswith('Z'):
+                    published_at_str = published_at_str[:-1]
+                published_at_datetime = datetime.strptime(published_at_str, "%Y-%m-%dT%H:%M:%S")
+                formatted_published_at = published_at_datetime.strftime("%Y-%m-%d %H:%M:%S")
 
-                data = {"author": author, "content": content, "sentiment": sentiment_label}
+                url_to_image = "https://newsapi.org/images/n-logo-border.png"
+                url = article.get('url') if article.get('url') else "Unknown"
+                title = article.get('title') if article.get('title') else "Unknown"
+                sentiment_label = analyze_sentiment(analyzer, content, sentiments)
+                source_name = "News"
+
+                data = {
+                    "keyword":search_keyword,
+                    'data':{
+                        "source_name":source_name,
+                        "author": author,
+                        "content": content,
+                        "sentiment_label": sentiment_label,
+                        "published_at":formatted_published_at,
+                        "url":url,
+                        "url_to_image":url_to_image,
+                        "title":title
+                        }
+                    }
                 all_news_data.append(data)
 
                 if index == 0:
@@ -408,9 +189,14 @@ def fetch_save_news_data(search_keywords, user_search):
                     k3_news_data = all_news_data
                     k3_sentiments = sentiments
                     
-            L1.append(sentiments)
-            user_search.each_keyword_sentiments_from_news = L1
+            each_keyword_sentiments_from_news.append(sentiments)
+            user_search.each_keyword_sentiments_from_news = each_keyword_sentiments_from_news
             user_search.save()
+            
+            each_keyword_news_combine_data = []
+            each_keyword_news_combine_data.extend(k1_news_data)
+            each_keyword_news_combine_data.extend(k2_news_data)
+            each_keyword_news_combine_data.extend(k3_news_data)
             
             news_articles, _ = News_Articles.objects.get_or_create(user_search=user_search)
             news_articles.search_terms = search_keywords
@@ -420,24 +206,26 @@ def fetch_save_news_data(search_keywords, user_search):
             news_articles.K1_news_sentiments = k1_sentiments
             news_articles.K2_news_sentiments = k2_sentiments
             news_articles.K3_news_sentiments = k3_sentiments
+            news_articles.each_keyword_combine_data = each_keyword_news_combine_data #l1
+            news_articles.each_keyword_total_sentiments = each_keyword_sentiments_from_news #L1
             news_articles.save()
-            user_search.total_news_responses = total_news_responses
-            user_search.save()
             
             news_articles_model.objects.create(
                 data=all_news_data,
-                keyword=search_keyword,
                 sentiments=sentiments,
                 user_search=user_search
             )
-                        
+        
             print(f"News saved successfully for {search_keyword}!")
             
-    return L1
+    return each_keyword_sentiments_from_news, each_keyword_news_combine_data
 
 @csrf_exempt
 def fetch_save_reddit_data(search_keywords, user_search):
         
+    each_keyword_total_reddit_responses = {}
+    each_keyword_sentiments_from_reddit=[]
+    
     k1_reddit_data = []
     k2_reddit_data = []
     k3_reddit_data = []
@@ -446,9 +234,6 @@ def fetch_save_reddit_data(search_keywords, user_search):
     k2_sentiments = {}
     k3_sentiments = {}
     
-    L2=[]
-    
-    total_reddit_responses = {}
     analyzer = SentimentIntensityAnalyzer()
 
     # Reddit API credentials
@@ -464,47 +249,55 @@ def fetch_save_reddit_data(search_keywords, user_search):
     )
 
     for index, search_keyword in enumerate(search_keywords):
-        formatted_comments = []
         sentiments = {"keyword": search_keyword, "positive_count": 0, "negative_count": 0, "neutral_count": 0}
 
+        formatted_comments = []
         try:
-            for comment in reddit.subreddit(search_keyword).comments(limit=100):
-                author_name = comment.author.name if comment.author else "Unknown"
-                comment_body = comment.body
-                sentiment_scores = analyzer.polarity_scores(comment_body)
-                compound_score = sentiment_scores['compound']
-
-                if compound_score >= 0.05:
-                    sentiment_label = "Positive"
-                    sentiments['positive_count'] += 1
-                elif compound_score <= -0.05:
-                    sentiment_label = "Negative"
-                    sentiments['negative_count'] += 1
-                else:
-                    sentiment_label = "Neutral"
-                    sentiments['neutral_count'] += 1
-
+            for comment in reddit.subreddit(search_keyword).comments(limit=10):
+                
+                title = comment.submission.title
+                source_name = "Reddit"
+                url = comment.submission.url
+                author = comment.author.name if comment.author else "Unknown"                    
+                content = comment.body
+                published_at = str(datetime.fromtimestamp(comment.created_utc))
+                sentiment_label = analyze_sentiment(analyzer, content, sentiments)
+                url_to_image = "https://cdn-icons-png.flaticon.com/512/2111/2111589.png"
+                
                 data = {
-                    "author": author_name,
-                    "content": comment_body,
-                    "sentiment": sentiment_label,
+                    'keyword':search_keyword,
+                    'data':{
+                    'title':title,
+                    'source_name':source_name,
+                    'url':url,
+                    'author':author,
+                    'content':content,
+                    'published_at':published_at,
+                    'sentiment_label':sentiment_label,
+                    'url_to_image':url_to_image,
+                    }
                 }
                 formatted_comments.append(data)
-
-                if index == 0:
-                    k1_reddit_data = formatted_comments
-                    k1_sentiments = sentiments
-                elif index == 1:
-                    k2_reddit_data = formatted_comments
-                    k2_sentiments = sentiments
-                elif index == 2:
-                    k3_reddit_data = formatted_comments
-                    k3_sentiments = sentiments
-            
-            L2.append(sentiments)
-            user_search.each_keyword_sentiments_from_reddit = L2
+                
+            if index == 0:
+                k1_reddit_data = formatted_comments
+                k1_sentiments = sentiments
+            elif index == 1:
+                k2_reddit_data = formatted_comments
+                k2_sentiments = sentiments
+            elif index == 2:
+                k3_reddit_data = formatted_comments
+                k3_sentiments = sentiments
+                
+            each_keyword_sentiments_from_reddit.append(sentiments)
+            user_search.each_keyword_sentiments_from_reddit = each_keyword_sentiments_from_reddit
             user_search.save()
-                        
+            
+            each_keyword_reddit_combine_data = []
+            each_keyword_reddit_combine_data.extend(k1_reddit_data)
+            each_keyword_reddit_combine_data.extend(k2_reddit_data)
+            each_keyword_reddit_combine_data.extend(k3_reddit_data)
+
             print(f"Reddit Comments fetched successfully for {search_keyword}!")
 
             reddit_comments, _ = Reddit_Comments.objects.get_or_create(user_search=user_search)
@@ -515,58 +308,56 @@ def fetch_save_reddit_data(search_keywords, user_search):
             reddit_comments.K1_reddit_sentiments = k1_sentiments
             reddit_comments.K2_reddit_sentiments = k2_sentiments
             reddit_comments.K3_reddit_sentiments = k3_sentiments
+            reddit_comments.each_keyword_combine_data = each_keyword_reddit_combine_data #l2
+            reddit_comments.each_keyword_total_sentiments = each_keyword_sentiments_from_reddit #l2
             reddit_comments.save()
-            
+
         except prawcore.exceptions.NotFound:
             # Handle exceptions for missing or private subreddits
             print(f"Subreddit '{search_keyword}' not found or is private.")
             continue
-        
-        total_reddit_responses[search_keyword] = len(formatted_comments)
+
+        each_keyword_total_reddit_responses[search_keyword] = len(formatted_comments)
+        user_search.each_keyword_total_reddit_responses = each_keyword_total_reddit_responses
+        user_search.save()
         # Create an instance of the appropriate model based on the keyword
         if index == 0:
-            reddit_article = Reddit_Comments_K1(sentiments=sentiments, data=formatted_comments,
-                                            keyword=search_keyword, user_search=user_search)
+            reddit_article = Reddit_Comments_K1(sentiments=sentiments, data=formatted_comments, user_search=user_search)
         elif index == 1:
-            reddit_article = Reddit_Comments_K2(sentiments=sentiments, data=formatted_comments,
-                                            keyword=search_keyword, user_search=user_search)
+            reddit_article = Reddit_Comments_K2(sentiments=sentiments, data=formatted_comments, user_search=user_search)
         elif index == 2:
-            reddit_article = Reddit_Comments_K3(sentiments=sentiments, data=formatted_comments,
-                                            keyword=search_keyword, user_search=user_search)
+            reddit_article = Reddit_Comments_K3(sentiments=sentiments, data=formatted_comments, user_search=user_search)
         reddit_article.save()
         print(f"Reddit Comments saved successfully for {search_keyword}!")
 
-        user_search.total_reddit_responses = total_reddit_responses
-        user_search.save()
-    return L2
+    return each_keyword_sentiments_from_reddit, each_keyword_reddit_combine_data
 
+@csrf_exempt
+def analyze_sentiment(analyzer, comment_body, sentiments):
+    sentiment_scores = analyzer.polarity_scores(comment_body)
+    compound_score = sentiment_scores['compound']
+
+    if compound_score >= 0.05:
+        sentiment_label = "Positive"
+        sentiments['positive_count'] += 1
+    elif compound_score <= -0.05:
+        sentiment_label = "Negative"
+        sentiments['negative_count'] += 1
+    else:
+        sentiment_label = "Neutral"
+        sentiments['neutral_count'] += 1
+
+    return sentiment_label
+
+@csrf_exempt
 def display_data(request):
     # Retrieve the data from the models
     user_searches = UserSearch.objects.all()
-    news_articles = News_Articles.objects.all()
-    reddit_comments = Reddit_Comments.objects.all()
-    news_articles_k1 = News_Articles_K1.objects.all()
-    news_articles_k2 = News_Articles_K2.objects.all()
-    news_articles_k3 = News_Articles_K3.objects.all()
-    reddit_comments_k1 = Reddit_Comments_K1.objects.all()
-    reddit_comments_k2 = Reddit_Comments_K2.objects.all()
-    reddit_comments_k3 = Reddit_Comments_K3.objects.all()
-
     # You can pass this data to your template as context
     context = {
         'user_searches': user_searches,
-        'news_articles': news_articles,
-        'reddit_comments': reddit_comments,
-        'news_articles_k1': news_articles_k1,
-        'news_articles_k2': news_articles_k2,
-        'news_articles_k3': news_articles_k3,
-        'reddit_comments_k1': reddit_comments_k1,
-        'reddit_comments_k2': reddit_comments_k2,
-        'reddit_comments_k3': reddit_comments_k3,
     }
-
     return render(request, 'display_data.html', context)
-
 
 class UserSearchList(generics.ListCreateAPIView):
     queryset = UserSearch.objects.all()

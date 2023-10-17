@@ -1,0 +1,34 @@
+/* style.css */
+.card {
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.card div {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: left;
+  transition: transform 0.2s;
+  margin-bottom: 10px;
+}
+
+.card div:hover {
+  transform: translateY(-5px);
+}
+
+.card p {
+  margin: 5px 0;
+}
+
+.card img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+a{
+  text-decoration: none;
+  color: black;
+}
