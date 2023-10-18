@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { Link } from 'react-router-dom';
+import axios from "axios";
 
 
 export default function Dashboard() {
@@ -8,7 +8,8 @@ export default function Dashboard() {
   useEffect(() => {
     async function getAllSearches() {
       try { 
-        const searches_response = await axios.get("http://127.0.0.1:8000/api/usersearch/");        
+        const searches_response = await axios.get("http://127.0.0.1:8000/api/usersearch/");
+        console.log(searches_response)
         setSearches(searches_response.data);
       }
       catch (error) {
@@ -19,7 +20,7 @@ export default function Dashboard() {
   }, []);
   return (
     <div>
-      <h1 style={{ textAlign: 'center' }}>Dashboard Page</h1>
+      <h1 style={{ textAlign: 'center' }}>Dashboard</h1>
       {searches.map((search, i) => {
         return (
           <div style={{ textAlign: 'center' }} key={search.id}>

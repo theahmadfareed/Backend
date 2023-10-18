@@ -62,7 +62,7 @@ export default function CreateProject() {
           value={keywords}
           onChange={handleInputChange}
         />
-        <button type="submit">Create Project</button>
+      <button type="submit">Create Project</button>
       </form>
 
       {isLoading && <Loader />}

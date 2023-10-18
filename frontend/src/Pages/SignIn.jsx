@@ -1,7 +1,7 @@
 export default function SignIn() {
   return (
     <div>
-      <h1>SignIn Page</h1>
+      <h1 style={{ textAlign: 'center' }}>SignIn Page</h1>
     </div>
   )
 }

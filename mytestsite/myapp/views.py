@@ -123,11 +123,11 @@ def fetch_save_news_data(search_keywords, user_search):
     
     for index, search_keyword in enumerate(search_keywords):
         
-        url = f'https://newsapi.org/v2/everything?q={search_keyword}&apiKey={api_key}&sort_by=relevancy&language=en&pageSize=10'
+        url = f'https://newsapi.org/v2/everything?q=+{search_keyword}&apiKey={api_key}&sort_by=relevancy&language=en&pageSize=100'
         response = requests.get(url)
 
         if response.status_code == 200:
-            print(f"News fetched successfully for {search_keyword}!")
+            print(f"News Articles fetched successfully for {search_keyword}!")
             
             each_keyword_total_news_responses[search_keyword] = len(response.json().get('articles', []))
             user_search.each_keyword_total_news_responses = each_keyword_total_news_responses
@@ -149,6 +149,7 @@ def fetch_save_news_data(search_keywords, user_search):
 
             for article in articles:
                 
+                source_name = "News"
                 author = article.get('author') if article.get('author') else "Unknown"
                 content = article.get('description') if article.get('description') else "Unknown"
 
@@ -162,7 +163,6 @@ def fetch_save_news_data(search_keywords, user_search):
                 url = article.get('url') if article.get('url') else "Unknown"
                 title = article.get('title') if article.get('title') else "Unknown"
                 sentiment_label = analyze_sentiment(analyzer, content, sentiments)
-                source_name = "News"
 
                 data = {
                     "keyword":search_keyword,
@@ -216,7 +216,7 @@ def fetch_save_news_data(search_keywords, user_search):
                 user_search=user_search
             )
         
-            print(f"News saved successfully for {search_keyword}!")
+            print(f"News Articles saved successfully for {search_keyword}!")
             
     return each_keyword_sentiments_from_news, each_keyword_news_combine_data
 
@@ -247,22 +247,39 @@ def fetch_save_reddit_data(search_keywords, user_search):
         client_secret=client_secret,
         user_agent=user_agent
     )
-
+    # if hasattr(reddit, "search"):
+    #     print("The search() method is available on the Reddit object.")
+    # else:
+    #     print("The search() method is not available on the Reddit object.")
+        
     for index, search_keyword in enumerate(search_keywords):
         sentiments = {"keyword": search_keyword, "positive_count": 0, "negative_count": 0, "neutral_count": 0}
 
         formatted_comments = []
         try:
-            for comment in reddit.subreddit(search_keyword).comments(limit=10):
-                
-                title = comment.submission.title
+            
+            subreddit = reddit.subreddit(search_keyword)
+            for submission in subreddit.hot(limit=100):
+                title = submission.title
                 source_name = "Reddit"
-                url = comment.submission.url
-                author = comment.author.name if comment.author else "Unknown"                    
-                content = comment.body
-                published_at = str(datetime.fromtimestamp(comment.created_utc))
-                sentiment_label = analyze_sentiment(analyzer, content, sentiments)
+                url = submission.url
+                author = submission.author.name if submission.author else "Unknown"
+                content = submission.selftext
+                published_at = str(datetime.fromtimestamp(submission.created_utc))
                 url_to_image = "https://cdn-icons-png.flaticon.com/512/2111/2111589.png"
+                sentiment_label = analyze_sentiment(analyzer, content, sentiments)
+                
+            # for comment in reddit.subreddit.comments.search(search_keyword, limit=10):
+            # # for comment in reddit.subreddit(search_keyword).comments(limit=10):
+                
+            #     title = comment.submission.title
+            #     source_name = "Reddit"
+            #     url = comment.submission.url
+            #     author = comment.author.name if comment.author else "Unknown"                    
+            #     content = comment.body
+            #     published_at = str(datetime.fromtimestamp(comment.created_utc))
+            #     sentiment_label = analyze_sentiment(analyzer, content, sentiments)
+            #     url_to_image = "https://cdn-icons-png.flaticon.com/512/2111/2111589.png"
                 
                 data = {
                     'keyword':search_keyword,
@@ -298,7 +315,7 @@ def fetch_save_reddit_data(search_keywords, user_search):
             each_keyword_reddit_combine_data.extend(k2_reddit_data)
             each_keyword_reddit_combine_data.extend(k3_reddit_data)
 
-            print(f"Reddit Comments fetched successfully for {search_keyword}!")
+            print(f"Reddit Posts fetched successfully for {search_keyword}!")
 
             reddit_comments, _ = Reddit_Comments.objects.get_or_create(user_search=user_search)
             reddit_comments.search_terms = search_keywords
@@ -328,7 +345,7 @@ def fetch_save_reddit_data(search_keywords, user_search):
         elif index == 2:
             reddit_article = Reddit_Comments_K3(sentiments=sentiments, data=formatted_comments, user_search=user_search)
         reddit_article.save()
-        print(f"Reddit Comments saved successfully for {search_keyword}!")
+        print(f"Reddit Posts saved successfully for {search_keyword}!")
 
     return each_keyword_sentiments_from_reddit, each_keyword_reddit_combine_data
 

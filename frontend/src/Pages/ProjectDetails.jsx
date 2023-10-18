@@ -2,8 +2,8 @@ import { useParams } from 'react-router-dom';
 import { useState, useEffect } from "react";
 import axios from "axios";
 import LineChart from "../Components/Chart/LineChart";
-import BarChart from "../Components/Chart/BarChart";
 import Card from "../Components/Card/Card";
+import "./style.css";
 
 export default function ProjectDetails() {
   const { projectId } = useParams();
@@ -24,13 +24,14 @@ export default function ProjectDetails() {
 
   return (
     <div>
-      <h1 className="App">Django Connected to React.Js</h1>
       {projectData && (
         <div>
-          <h2 style={{ textAlign: 'center' }}>{projectData.search_terms}</h2>
           <LineChart line_data={projectData.graph_data} />
-          <BarChart total_sentiments={projectData.total_sentiments[0]} />
-          <Card keywordData={projectData.each_keyword_combine_data} />
+          <br />
+          <h2 style={{ textAlign: 'center' }}>{projectData.search_terms}</h2>
+          <div>
+            <Card keywordData={projectData.each_keyword_combine_data} />
+          </div>
         </div>
       )}
     </div>

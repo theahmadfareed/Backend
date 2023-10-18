@@ -1,7 +1,7 @@
 export default function SignUp() {
   return (
     <div>
-      <h1>SignUp Page</h1>
+      <h1 style={{ textAlign: 'center' }}>SignUp Page</h1>
     </div>
   )
 }
