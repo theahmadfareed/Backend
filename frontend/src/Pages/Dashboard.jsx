@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from 'react-router-dom';
 import axios from "axios";
+import "./style.css"; // Import your CSS file
 
 
 export default function Dashboard() {
@@ -19,27 +20,26 @@ export default function Dashboard() {
     getAllSearches();
   }, []);
   return (
-    <div>
-      <h1 style={{ textAlign: 'center' }}>Dashboard</h1>
-      {searches.map((search, i) => {
-        return (
-          <div style={{ textAlign: 'center' }} key={search.id}>
-            <Link to={`/project-details/${search.id}`}>
-              <b>
-                <span>{search.id}:</span>&emsp;
-                <span>{search.search_terms}</span>&emsp;
-                <span>(
-                  <span>Positive: {search.total_sentiments[0].total_positive} &nbsp; </span>
-                  <span>Negative: {search.total_sentiments[0].total_negative} &nbsp; </span>
-                  <span>Neutral: {search.total_sentiments[0].total_neutral}</span>)
-                </span>&emsp;
-                <span>{search.created_at}</span>
-              </b>
-            </Link>
-          </div>  
-        )
-      })
-      }
+    <div className="dashboard-container">
+      <h1 className="dashboard-heading">Dashboard</h1>
+      {searches.map((search, i) => (
+        <div className="search-item" key={search.id}>
+          <Link to={`/project-details/${search.id}`}>
+            <b>
+              <span>{search.id}:</span>&emsp;
+              <span>{search.search_terms}</span>&emsp;
+              <span>
+                (
+                <span>Positive: {search.total_sentiments[0].total_positive} &nbsp; </span>
+                <span>Negative: {search.total_sentiments[0].total_negative} &nbsp; </span>
+                <span>Neutral: {search.total_sentiments[0].total_neutral}</span>
+                )
+              </span>&emsp;
+              <span>{search.created_at}</span>
+            </b>
+          </Link>
+        </div>
+      ))}
     </div>
   )
 }

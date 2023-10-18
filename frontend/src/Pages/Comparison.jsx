@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from 'react-router-dom';
 import axios from "axios";
 import ComparisonChart from "../Components/Chart/ComparisonChart";
+import "./style.css"; // Import your CSS file
 
 export default function Dashboard() {
   const [searches, setSearches] = useState([]);
@@ -64,32 +65,34 @@ export default function Dashboard() {
   };
 
   return (
-    <div>
-      <h1 style={{ textAlign: 'center' }}>Compare your Projects!</h1>
-      {searches.map((search, i) => {
-        return (
-          <div style={{ textAlign: 'center' }} key={search.id}>
-            <input
-              type="checkbox"
-              checked={selectedProjects.includes(search.id)}
-              onChange={() => handleCheckboxChange(search.id)}
-            />
-            <Link to={`/project-details/${search.id}`}>
-              <b>
-                <span>{search.id}:</span>&emsp;
-                <span>{search.search_terms}</span>&emsp;
-                <span>(
-                  <span>Positive: {search.total_sentiments[0].total_positive} &nbsp; </span>
-                  <span>Negative: {search.total_sentiments[0].total_negative} &nbsp; </span>
-                  <span>Neutral: {search.total_sentiments[0].total_neutral}</span>)
-                </span>&emsp;
-                <span>{search.created_at}</span>
-              </b>
-            </Link>
-          </div>
-        );
-      })}
-      <button onClick={handleCompareProjects}>Compare Selected Projects</button>
+    <div className="dashboard-container">
+      <h1 className="dashboard-heading">Compare Your Projects!</h1>
+      {searches.map((search, i) => (
+        <div className="search-item" key={search.id}>
+          <input
+            type="checkbox"
+            checked={selectedProjects.includes(search.id)}
+            onChange={() => handleCheckboxChange(search.id)}
+          />
+          <Link to={`/project-details/${search.id}`}>
+            <b>
+              <span>{search.id}:</span>&emsp;
+              <span>{search.search_terms}</span>&emsp;
+              <span>
+                (
+                <span>Positive: {search.total_sentiments[0].total_positive} &nbsp; </span>
+                <span>Negative: {search.total_sentiments[0].total_negative} &nbsp; </span>
+                <span>Neutral: {search.total_sentiments[0].total_neutral}</span>
+                )
+              </span>&emsp;
+              <span>{search.created_at}</span>
+            </b>
+          </Link>
+        </div>
+      ))}
+      <button className="compare-button" onClick={handleCompareProjects}>
+        Compare Selected Projects
+      </button>
       {selectedProjects.length === 2 && (
         <ComparisonChart
           total_sentiments1={projectSentiments1}

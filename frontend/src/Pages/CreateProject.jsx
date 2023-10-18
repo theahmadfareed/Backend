@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Loader from '../Components/Loader/Loader';
+import "./style.css"; // Import your CSS file
 
 export default function CreateProject() {
   const [keywords, setKeywords] = useState(''); // Use state to manage the keyword input
@@ -53,19 +54,22 @@ export default function CreateProject() {
   };
 
   return (
-    <div style={{ textAlign: 'center' }}>
-      <h1>Create Project</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Enter 3 comma-separated keywords"
-          value={keywords}
-          onChange={handleInputChange}
-        />
-      <button type="submit">Create Project</button>
-      </form>
+    <div className="create-project-container">
+    <h1 className="create-project-heading">Create Project</h1>
+    <form onSubmit={handleSubmit} className="create-project-form">
+      <input
+        type="text"
+        placeholder="Enter 3 comma-separated keywords"
+        value={keywords}
+        onChange={handleInputChange}
+        className="create-project-input"
+      />
+      <button type="submit" className="create-project-button">
+        Create Project
+      </button>
+    </form>
 
-      {isLoading && <Loader />}
-    </div>
+    {isLoading && <Loader />}
+  </div>
   );
 }
