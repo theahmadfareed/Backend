@@ -11,7 +11,7 @@ export default function ReportData(props) {
   useEffect(() => {
     async function handleReportData() {
       try {
-        const response = await axios.get(`/api/fetchData/${p_id}/`);
+        const response = await axios.get(`http://127.0.0.1:8000/api/usersearch/${p_id}`);
         setProjectData(response.data);
         console.log(response.data);
         setBarChartDataNews(response.data.each_keyword_sentiments_from_news)

@@ -71,10 +71,11 @@ DATABASES = {
         'NAME': 'demodb',
         'USER': 'root',
         'PASSWORD': 'root',
-        'HOST': '127.0.0.1',
+        'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {
             'charset': 'utf8mb4',
+            
         },
     }
 }
@@ -122,10 +123,10 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',# Example: Add the URL of your React frontend
-    'http://localhost:4000',
-]
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:3000',# Example: Add the URL of your React frontend
+#     'http://localhost:4000',
+# ]
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES':('rest_framework.renderers.JSONRenderer',)

@@ -7,20 +7,10 @@ import jsPDF from "jspdf";
 
 const Reports = () => {
   const [searches, setSearches] = useState([]);
-  useEffect(() => {
-    async function getAllSearches() {
-      try {
-        const searches_response = await axios.get("http://127.0.0.1:8000/api/usersearch/");
-        console.log(searches_response.data);
-        setSearches(searches_response.data);
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    getAllSearches();
-  }, []);
-
   const [selectedProjects, setSelectedProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const ref = useRef();
+
   const handleCheckboxChange = (projectId) => {
     // Check if the project is already in the selectedProjects array
     if (selectedProjects.includes(projectId)) {
@@ -37,8 +27,6 @@ const Reports = () => {
       }
     }
   };
-
-  const ref = useRef();
 
   const handleDownloadPdf = () => {
     // Get the HTML element to be captured as a PDF
@@ -60,6 +48,20 @@ const Reports = () => {
     });
   };
 
+  useEffect(() => {
+    async function getAllSearches() {
+      try {
+        const searches_response = await axios.get("http://127.0.0.1:8000/api/usersearch/");
+        setSearches(searches_response.data);
+        setLoading(false);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    getAllSearches();
+  }, []);
+
   return (
     <div style={{ backgroundColor: "pink" }}>
       <div style={{ textAlign: "center" }}>
@@ -72,24 +74,27 @@ const Reports = () => {
             />
             <Link to={`/project-details/${search.id}`}>
               <b style={{ marginTop: "10px" }}>
-                <span>{search.id}:</span>&emsp;
-                <span>{search.search_terms}</span>&emsp;
-                <span>
-                  (
-                  <span>Positive: {search.total_sentiments[0].total_positive} &nbsp; </span>
-                  <span>Negative: {search.total_sentiments[0].total_negative} &nbsp; </span>
-                  <span>Neutral: {search.total_sentiments[0].total_neutral}</span>
-                  )
-                </span>&emsp;
-                <span>{search.created_at}</span>
+                <b>{search.id}:</b>&emsp;
+                {search.search_terms}&emsp;
+                (
+                <span>Positive: {search.total_sentiments[0].total_positive} &nbsp; </span>
+                <span>Negative: {search.total_sentiments[0].total_negative} &nbsp; </span>
+                <span>Neutral: {search.total_sentiments[0].total_neutral}</span>
+                )
+                &emsp;
+                {search.created_at}
               </b>
             </Link>
           </div>
         ))}
       </div>
-      <button onClick={handleDownloadPdf}>Download PDF</button>
+
+      <button disabled={loading} onClick={handleDownloadPdf}>
+        Download PDF
+      </button>
+
       <div ref={ref} style={{ marginTop: "30px" }}>
-        {selectedProjects.length === 1 && <ReportData data={selectedProjects[0]} />}
+        {selectedProjects.length === 1 && !loading && <ReportData data={selectedProjects[0]} />}
       </div>
     </div>
   );
