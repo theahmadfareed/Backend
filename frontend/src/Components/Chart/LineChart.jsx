@@ -8,11 +8,6 @@ const LineChart = (props) => {
   const n = props.line_data.Negative; //[1,4,1,6,0]
   const ne = props.line_data.Neutral; //[9,7,1,9,0]
 
-  // console.log(d)
-  // console.log(p)
-  // console.log(n)
-  // console.log(ne)
-
   const chartRef = useRef(null);
 
   useEffect(() => {

@@ -1,10 +1,9 @@
 import React, { useEffect, useRef } from "react";
 import Chart from "chart.js/auto";
-import "./style.css";
-
 
 const BarChart = ({ total_sentiments }) => {
   const chartRef = useRef(null);
+  const chartInstanceRef = useRef(null); // Reference to the Chart.js instance
 
   useEffect(() => {
     const ctx = chartRef.current.getContext("2d");
@@ -15,9 +14,9 @@ const BarChart = ({ total_sentiments }) => {
         {
           label: "Bar-Chart",
           data: [
-            total_sentiments.total_positive,
-            total_sentiments.total_negative,
-            total_sentiments.total_neutral,
+            total_sentiments.positive_count,
+            total_sentiments.negative_count,
+            total_sentiments.neutral_count,
           ],
           backgroundColor: ["green", "red", "blue"],
         },
@@ -32,17 +31,17 @@ const BarChart = ({ total_sentiments }) => {
       },
     };
 
-    // Check if the chart instance already exists and destroy it
-    if (window.sentimentChart) {
-      window.sentimentChart.destroy();
+    // Destroy the previous Chart.js instance (if it exists)
+    if (chartInstanceRef.current) {
+      chartInstanceRef.current.destroy();
     }
 
-    window.sentimentChart = new Chart(ctx, {
+    // Create a new Chart.js instance
+    chartInstanceRef.current = new Chart(ctx, {
       type: "bar",
       data: chartData,
       options: chartOptions,
     });
-    window.sentimentChart.resize(600, 600);
   }, [total_sentiments]);
 
   return (
@@ -53,4 +52,3 @@ const BarChart = ({ total_sentiments }) => {
 };
 
 export default BarChart;
-

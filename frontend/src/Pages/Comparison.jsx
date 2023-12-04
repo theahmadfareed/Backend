@@ -66,7 +66,6 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-container">
-      <h1 className="dashboard-heading">Compare Your Projects!</h1>
       {searches.map((search, i) => (
         <div className="search-item" key={search.id}>
           <input

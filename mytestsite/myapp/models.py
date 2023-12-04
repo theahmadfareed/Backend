@@ -1,6 +1,11 @@
 # Create your models here.
 from django.db import models
 
+
+class UserProfile(models.Model):
+    u_name = models.CharField(max_length=30)
+    u_email = models.CharField(max_length=30)
+    
 class UserSearch(models.Model):
     search_terms = models.TextField(null=True)
     created_at =  models.DateField(auto_now_add=True)
@@ -12,6 +17,12 @@ class UserSearch(models.Model):
     each_keyword_combine_data = models.JSONField(default=None,null=True)
     each_keyword_total_sentiments = models.JSONField(default=None,null=True)
     graph_data = models.JSONField(default=None,null=True)
+    k1_news_graph_data = models.JSONField(default=None,null=True)
+    k2_news_graph_data = models.JSONField(default=None,null=True)
+    k3_news_graph_data = models.JSONField(default=None,null=True)
+    k1_reddit_graph_data = models.JSONField(default=None,null=True)
+    k2_reddit_graph_data = models.JSONField(default=None,null=True)
+    k3_reddit_graph_data = models.JSONField(default=None,null=True)
 
 class News_Articles(models.Model):
     user_search = models.ForeignKey(UserSearch, on_delete=models.CASCADE)
@@ -24,6 +35,7 @@ class News_Articles(models.Model):
     K3_news_sentiments = models.JSONField(default=None,null=True)
     each_keyword_combine_data = models.JSONField(default=None,null=True)
     each_keyword_total_sentiments = models.JSONField(default=None,null=True)
+
 class News_Articles_K1(models.Model):
     user_search = models.ForeignKey(UserSearch, on_delete=models.CASCADE)
     data = models.JSONField(default=list)

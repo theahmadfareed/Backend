@@ -55,7 +55,6 @@ export default function CreateProject() {
 
   return (
     <div className="create-project-container">
-    <h1 className="create-project-heading">Create Project</h1>
     <form onSubmit={handleSubmit} className="create-project-form">
       <input
         type="text"

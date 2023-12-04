@@ -14,6 +14,35 @@ import pytz
 from collections import defaultdict
 
 @csrf_exempt
+def signUp(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))  # Decode the bytes to a string
+        name = data.get('u_name', '')  # Get the 'u_name' from POST data
+        email = data.get('u_email', '')  # Get the 'u_email' from POST data
+
+        if name and email:  # Check if name and email are not empty
+            user_profile = UserProfile(u_name=name, u_email=email)
+            user_profile.save()
+            return JsonResponse({"message": "Record Saved!"})
+        else:
+            return JsonResponse({"error": "Name and email are required fields."}, status=400)
+    else:
+        return JsonResponse({"error": "Invalid request method."}, status=405)
+
+@csrf_exempt
+def signIn(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))  # Decode the bytes to a string
+        name = data.get('u_name', '')  # Get the 'u_name' from POST data
+        print(name)
+        user_profile = UserProfile.objects.get(u_name=name)
+        # If the user is found, return their email in the response
+        response_data = {'message': 'User exists', 'email': user_profile.u_email}
+        return JsonResponse(response_data)
+    else:
+        return HttpResponse("Invalid", status=400)  # Return a 400 Bad Request response for other request methods
+
+@csrf_exempt
 def fetch_save_data (request):
     if request.method == 'POST':
         try:
@@ -23,8 +52,8 @@ def fetch_save_data (request):
             user_search = UserSearch(search_terms=search_keywords)
             user_search.save()
                         
-            each_keyword_sentiments_from_news, each_keyword_news_combine_data = fetch_save_news_data(search_keywords, user_search)
             each_keyword_sentiments_from_reddit, each_keyword_reddit_combine_data = fetch_save_reddit_data(search_keywords, user_search)
+            each_keyword_sentiments_from_news, each_keyword_news_combine_data = fetch_save_news_data(search_keywords, user_search)
             
             combined_data = []
             combined_data.extend(each_keyword_news_combine_data)
@@ -48,7 +77,6 @@ def fetch_save_data (request):
             positive = [sentiment_counts[date]["Positive"] for date in dates]
             negative = [sentiment_counts[date]["Negative"] for date in dates]
             neutral = [sentiment_counts[date]["Neutral"] for date in dates]
-
             result_data = {
                 "Dates":dates,
                 "Positive":positive,
@@ -182,17 +210,80 @@ def fetch_save_news_data(search_keywords, user_search):
                 if index == 0:
                     k1_news_data = all_news_data
                     k1_sentiments = sentiments
+                    # Initialize dictionaries to store sentiment counts
+                    sentiment_counts_k1 = defaultdict(lambda: defaultdict(int))
+                    # Iterate through the sorted_data and count sentiments for each date
+                    for data in k1_news_data:
+                        date = data["data"]["published_at"][:10]  # Extract the date
+                        sentiment = data["data"]["sentiment_label"]
+                        sentiment_counts_k1[date][sentiment] += 1
+                    # Create the final lists
+                    k1_dates = sorted(sentiment_counts_k1.keys())
+                    k1_positive = [sentiment_counts_k1[date]["Positive"] for date in k1_dates]
+                    k1_negative = [sentiment_counts_k1[date]["Negative"] for date in k1_dates]
+                    k1_neutral = [sentiment_counts_k1[date]["Neutral"] for date in k1_dates]
+                    k1_graph_data = {
+                        "Keyword":search_keyword,
+                        "Dates":k1_dates,
+                        "Positive":k1_positive,
+                        "Negative":k1_negative,
+                        "Neutral":k1_neutral,
+                    }
+                    user_search.k1_news_graph_data = k1_graph_data
+                    user_search.save()
                 elif index == 1:
                     k2_news_data = all_news_data
                     k2_sentiments = sentiments
+                    # Initialize dictionaries to store sentiment counts
+                    sentiment_counts_k2 = defaultdict(lambda: defaultdict(int))
+                    # Iterate through the sorted_data and count sentiments for each date
+                    for data in k2_news_data:
+                        date = data["data"]["published_at"][:10]  # Extract the date
+                        sentiment = data["data"]["sentiment_label"]
+                        sentiment_counts_k2[date][sentiment] += 1
+                    # Create the final lists
+                    k2_dates = sorted(sentiment_counts_k2.keys())
+                    k2_positive = [sentiment_counts_k2[date]["Positive"] for date in k2_dates]
+                    k2_negative = [sentiment_counts_k2[date]["Negative"] for date in k2_dates]
+                    k2_neutral = [sentiment_counts_k2[date]["Neutral"] for date in k2_dates]
+                    k2_graph_data = {
+                        "Keyword":search_keyword,
+                        "Dates":k2_dates,
+                        "Positive":k2_positive,
+                        "Negative":k2_negative,
+                        "Neutral":k2_neutral,
+                    }
+                    user_search.k2_news_graph_data = k2_graph_data
+                    user_search.save()
+                    
                 elif index == 2:
                     k3_news_data = all_news_data
                     k3_sentiments = sentiments
-                    
+                    # Initialize dictionaries to store sentiment counts
+                    sentiment_counts_k3 = defaultdict(lambda: defaultdict(int))
+                    # Iterate through the sorted_data and count sentiments for each date
+                    for data in k3_news_data:
+                        date = data["data"]["published_at"][:10]  # Extract the date
+                        sentiment = data["data"]["sentiment_label"]
+                        sentiment_counts_k3[date][sentiment] += 1
+                    # Create the final lists
+                    k3_dates = sorted(sentiment_counts_k3.keys())
+                    k3_positive = [sentiment_counts_k3[date]["Positive"] for date in k3_dates]
+                    k3_negative = [sentiment_counts_k3[date]["Negative"] for date in k3_dates]
+                    k3_neutral = [sentiment_counts_k3[date]["Neutral"] for date in k3_dates]
+                    k3_graph_data = {
+                        "Keyword":search_keyword,
+                        "Dates":k3_dates,
+                        "Positive":k3_positive,
+                        "Negative":k3_negative,
+                        "Neutral":k3_neutral,
+                    }
+                    user_search.k3_news_graph_data = k3_graph_data
+                    user_search.save()
             each_keyword_sentiments_from_news.append(sentiments)
             user_search.each_keyword_sentiments_from_news = each_keyword_sentiments_from_news
             user_search.save()
-            
+            #
             each_keyword_news_combine_data = []
             each_keyword_news_combine_data.extend(k1_news_data)
             each_keyword_news_combine_data.extend(k2_news_data)
@@ -269,18 +360,6 @@ def fetch_save_reddit_data(search_keywords, user_search):
                 url_to_image = "https://cdn-icons-png.flaticon.com/512/2111/2111589.png"
                 sentiment_label = analyze_sentiment(analyzer, content, sentiments)
                 
-            # for comment in reddit.subreddit.comments.search(search_keyword, limit=10):
-            # # for comment in reddit.subreddit(search_keyword).comments(limit=10):
-                
-            #     title = comment.submission.title
-            #     source_name = "Reddit"
-            #     url = comment.submission.url
-            #     author = comment.author.name if comment.author else "Unknown"                    
-            #     content = comment.body
-            #     published_at = str(datetime.fromtimestamp(comment.created_utc))
-            #     sentiment_label = analyze_sentiment(analyzer, content, sentiments)
-            #     url_to_image = "https://cdn-icons-png.flaticon.com/512/2111/2111589.png"
-                
                 data = {
                     'keyword':search_keyword,
                     'data':{
@@ -299,17 +378,80 @@ def fetch_save_reddit_data(search_keywords, user_search):
             if index == 0:
                 k1_reddit_data = formatted_comments
                 k1_sentiments = sentiments
+                # Initialize dictionaries to store sentiment counts
+                sentiment_counts_k1 = defaultdict(lambda: defaultdict(int))
+                # Iterate through the sorted_data and count sentiments for each date
+                for data in k1_reddit_data:
+                    date = data["data"]["published_at"][:10]  # Extract the date
+                    sentiment = data["data"]["sentiment_label"]
+                    sentiment_counts_k1[date][sentiment] += 1
+                # Create the final lists
+                k1_dates = sorted(sentiment_counts_k1.keys())
+                k1_positive = [sentiment_counts_k1[date]["Positive"] for date in k1_dates]
+                k1_negative = [sentiment_counts_k1[date]["Negative"] for date in k1_dates]
+                k1_neutral = [sentiment_counts_k1[date]["Neutral"] for date in k1_dates]
+                k1_graph_data = {
+                    "Keyword":search_keyword,
+                    "Dates":k1_dates,
+                    "Positive":k1_positive,
+                    "Negative":k1_negative,
+                    "Neutral":k1_neutral,
+                }
+                user_search.k1_reddit_graph_data = k1_graph_data
+                user_search.save()
             elif index == 1:
                 k2_reddit_data = formatted_comments
                 k2_sentiments = sentiments
+                # Initialize dictionaries to store sentiment counts
+                sentiment_counts_k2 = defaultdict(lambda: defaultdict(int))
+                # Iterate through the sorted_data and count sentiments for each date
+                for data in k2_reddit_data:
+                    date = data["data"]["published_at"][:10]  # Extract the date
+                    sentiment = data["data"]["sentiment_label"]
+                    sentiment_counts_k2[date][sentiment] += 1
+                # Create the final lists
+                k2_dates = sorted(sentiment_counts_k2.keys())
+                k2_positive = [sentiment_counts_k2[date]["Positive"] for date in k2_dates]
+                k2_negative = [sentiment_counts_k2[date]["Negative"] for date in k2_dates]
+                k2_neutral = [sentiment_counts_k2[date]["Neutral"] for date in k2_dates]
+                k2_graph_data = {
+                    "Keyword":search_keyword,
+                    "Dates":k2_dates,
+                    "Positive":k2_positive,
+                    "Negative":k2_negative,
+                    "Neutral":k2_neutral,
+                }
+                user_search.k2_reddit_graph_data = k2_graph_data
+                user_search.save()
             elif index == 2:
                 k3_reddit_data = formatted_comments
                 k3_sentiments = sentiments
+                # Initialize dictionaries to store sentiment counts
+                sentiment_counts_k3 = defaultdict(lambda: defaultdict(int))
+                # Iterate through the sorted_data and count sentiments for each date
+                for data in k3_reddit_data:
+                    date = data["data"]["published_at"][:10]  # Extract the date
+                    sentiment = data["data"]["sentiment_label"]
+                    sentiment_counts_k3[date][sentiment] += 1
+                # Create the final lists
+                k3_dates = sorted(sentiment_counts_k3.keys())
+                k3_positive = [sentiment_counts_k3[date]["Positive"] for date in k3_dates]
+                k3_negative = [sentiment_counts_k3[date]["Negative"] for date in k3_dates]
+                k3_neutral = [sentiment_counts_k3[date]["Neutral"] for date in k3_dates]
+                k3_graph_data = {
+                    "Keyword":search_keyword,
+                    "Dates":k3_dates,
+                    "Positive":k3_positive,
+                    "Negative":k3_negative,
+                    "Neutral":k3_neutral,
+                }
+                user_search.k3_reddit_graph_data = k3_graph_data
+                user_search.save()
                 
             each_keyword_sentiments_from_reddit.append(sentiments)
             user_search.each_keyword_sentiments_from_reddit = each_keyword_sentiments_from_reddit
             user_search.save()
-            
+            #
             each_keyword_reddit_combine_data = []
             each_keyword_reddit_combine_data.extend(k1_reddit_data)
             each_keyword_reddit_combine_data.extend(k2_reddit_data)
